@@ -7,6 +7,7 @@ export const Config_21J = {
         PlayerHitCard: "PlayerHitCard",
         GetPlayerData: "GetPlayerData",
         UpdatePlayerData: "UpdatePlayerData",
+        UpdatePlayerCards: "UpdatePlayerCards",
     },
     TimeConfig: {
         TimeWaitStart: 5,

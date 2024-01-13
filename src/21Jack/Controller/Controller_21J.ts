@@ -33,6 +33,10 @@ class Controller_21J{
         }else{
             room.ClientDic.Remove(client.sessionId);
         }
+        if(room.ClientDic.Count() == 0){
+            room.disconnect();
+            return;
+        }
         var playerLeave  = new PlayerLeave_21J();
         playerLeave.SessionId = client.sessionId;
         room.sendToAllClient(Config_21J.Message_Key_Config.PlayerLeave, playerLeave);
@@ -42,8 +46,8 @@ class Controller_21J{
         var playerData = room.playerDataDic.Get(client.sessionId)
         var cardSlot = playerData.Slot[hitCard.slot];
         var card = playerData.Cards[0];
-        cardSlot.Cards.push(playerData.Cards[0])
-        Util.arrayRemoveByIndex(cardSlot.Cards, 0);
+        cardSlot.Cards.push(card)
+        Util.arrayRemoveByIndex(playerData.Cards, 0);
         var point = cardSlot.CaculatePoint();
         for (let index = 0; index < playerData.WhiteCard.length; index++) {
             const element = playerData.WhiteCard[index];
@@ -63,11 +67,11 @@ class Controller_21J{
         }
 
         if(cardSlot.Cards.length >= 5) cardSlot.Cards = [];
-
         var result = new ResultHitCard_21J();
         result.slot = hitCard.slot;
         result.Cards = cardSlot.Cards;
         room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.PlayerHitCard, result);
+        room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.UpdatePlayerCards, playerData.Cards);
     }
 
     async GetPlayerData(room : Room_21J, client : Client){
@@ -103,6 +107,8 @@ function StartGame(room: Room_21J){
         const element = keys[index];
         var playerData = room.playerDataDic.Get(element);
         playerData.ResetData();
+        var player = room.state.players.get(element);
+        player!.health = Config_21J.PlayerConfig.HealthStart; 
         room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.UpdatePlayerData, playerData);
     }
 }

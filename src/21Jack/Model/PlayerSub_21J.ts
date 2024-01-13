@@ -25,6 +25,10 @@ export class PlayerData_21J{
             this.Cards.push(cards[rand])
             Util.arrayRemoveByIndex(cards, rand);
         }
+        this.Slot = [];
+        for (let index = 0; index < 4; index++) {
+            this.Slot.push(new CardSlot());
+        }
     }
 }
 

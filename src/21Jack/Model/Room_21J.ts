@@ -7,6 +7,7 @@ import { PlayerData_21J, HitCard_21J, PlayerInfo_21J } from "./PlayerSub_21J";
 import { Config_21J } from "../Config/Config_21J";
 import { controller_21J } from "../Controller/Controller_21J";
 import { GameState_21J } from "../Config/GameState_21J";
+import { logCtrl } from "../../Utils/LogCtrl";
 
 export class Room_21J extends Room<State_21J> {
     maxClients: number = 1;
@@ -26,10 +27,12 @@ export class Room_21J extends Room<State_21J> {
         this.InitRoom();
         this.onMessage("message", (client, data)=>{
         })
-        this.onMessage(Config_21J.Message_Key_Config.PlayerJoin, (client, data : HitCard_21J)=>{
+        this.onMessage(Config_21J.Message_Key_Config.PlayerHitCard, (client, data : HitCard_21J)=>{
+            logCtrl.LogMessage(client.sessionId, "PlayerHitCard", JSON.stringify(data))
             controller_21J.PlayerHitCard(this, client, data)
         })
         this.onMessage(Config_21J.Message_Key_Config.GetPlayerData, (client, data)=>{
+            logCtrl.LogMessage(client.sessionId, "GetPlayerData", JSON.stringify(data))
             controller_21J.GetPlayerData(this, client);
         })
         this.delayedInterval = this.clock.setInterval(() => {
