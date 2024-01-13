@@ -1,0 +1,38 @@
+{
+  "name": "blackjack-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "tsx src/App.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "@colyseus/uwebsockets-transport": "^0.14.24",
+    "@types/express": "^4.17.14",
+    "@types/node": "^20.8.7",
+    "@types/node-fetch": "^2.6.4",
+    "tsx": "^3.12.7",
+    "typescript": "^5.0.4"
+  },
+  "dependencies": {
+    "@colyseus/arena": "^0.14.24",
+    "@colyseus/monitor": "^0.14.22",
+    "colyseus": "^0.14.23",
+    "mongoose": "^7.0.4",
+    "serve-index": "^1.9.1",
+    "colyseus.js": "^0.14.12",
+    "dotenv": "^16.3.1",
+    "redis": "^3.1.2",
+    "http": "^0.0.1-security",
+    "express": "^4.18.2",
+    "bcrypt": "^5.1.0",
+    "cors": "^2.8.5",
+    "body-parser": "^1.20.2",
+    "express-validator": "^6.15.0"
+  }
+}
