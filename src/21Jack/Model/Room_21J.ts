@@ -76,6 +76,7 @@ export class Room_21J extends Room<State_21J> {
     }
 
     sendToClient(sessionId : string, key : string, data){
+        logCtrl.LogMessage(sessionId, key, data)
         try {
             var client =  this.ClientDic.Get(sessionId);
             if(client == null || client == undefined) return;
