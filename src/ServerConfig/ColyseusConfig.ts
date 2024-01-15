@@ -4,6 +4,7 @@ import path from 'path';
 import serveIndex from 'serve-index';
 import express from 'express';
 import { Room_21J } from "../21Jack/Model/Room_21J";
+import { Room_BJ } from "../BlackJack/Model/Room_BJ";
 // import { uWebSocketsTransport} from "@colyseus/uwebsockets-transport";
 
 // Import demo room handlers
@@ -18,6 +19,8 @@ export const configColyseus = config({
         // Define "state_handler" room
 
         gameServer.define("21J", Room_21J)
+        .enableRealtimeListing();
+        gameServer.define("BJ", Room_BJ)
         .enableRealtimeListing();
 
         gameServer.onShutdown(function(){

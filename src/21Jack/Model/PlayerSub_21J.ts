@@ -16,7 +16,7 @@ export class PlayerData_21J{
 
     ResetData(){
         var cards : number[] = [];
-        for (let index = 1; index <= 52; index++) {
+        for (let index = 0; index < 52; index++) {
             cards.push(index);
         }
         this.Cards = [];

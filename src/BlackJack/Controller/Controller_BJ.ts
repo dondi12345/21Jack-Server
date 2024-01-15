@@ -1,8 +1,8 @@
 import { Client } from "colyseus";
 import { Room_BJ } from "../Model/Room_BJ";
-import { CardData_BJ, PlayerData_BJ, PlayerInfo_BJ, PlayerJoinResult_BJ, PlayerLeave_BJ } from "../Model/PlayerSub_BJ";
-import { Message_Key_Config, TimeConfig } from "../Config/Config_BJ";
-import { GameState_BJ } from "../Config/GameStatus";
+import { CardData_BJ, DealCardPlayer_BJ, DealCard_BJ, PlayerData_BJ, PlayerInfo_BJ, PlayerJoinResult_BJ, PlayerLeave_BJ } from "../Model/PlayerSub_BJ";
+import { Config_BJ} from "../Config/Config_BJ";
+import { StateStatus_BJ, PlayerStatus_BJ } from "../Config/GameStatus";
 import { Util } from "../../Utils/Utils";
 
 class Controller_BJ{
@@ -18,14 +18,14 @@ class Controller_BJ{
         var playerJoinResult = new PlayerJoinResult_BJ();
         playerJoinResult.playerInfo = playerInfo;
 
-        room.sendToAllClient(Message_Key_Config.PlayerJoin, playerJoinResult);
+        room.sendToAllClient(Config_BJ.Message_Key_Config.PlayerJoin, playerJoinResult);
         if(room.playerDataDic.Count() >= room.maxClients){
             GameStart(room);
         }
     }
 
     PlayerLeave(room: Room_BJ, client: Client) {
-        if(room.state.status == GameState_BJ.Waiting){
+        if(room.state.status == StateStatus_BJ.Waiting){
             room.playerDataDic.Remove(client.sessionId)
             room.ClientDic.Remove(client.sessionId);
         }else{
@@ -33,7 +33,12 @@ class Controller_BJ{
         }
         var playerLeave  = new PlayerLeave_BJ();
         playerLeave.SessionId = client.sessionId;
-        room.sendToAllClient(Message_Key_Config.PlayerLeave, playerLeave);
+        room.sendToAllClient(Config_BJ.Message_Key_Config.PlayerLeave, playerLeave);
+    }
+
+    GetPlayerData(room: Room_BJ, client: Client, sessionId : string){
+        var playerData = room.playerDataDic.Get(sessionId);
+        room.sendToClient(client.sessionId, Config_BJ.Message_Key_Config.UpdatePlayerData,playerData);
     }
 
     async PlayerHit(room: Room_BJ, client: Client){
@@ -47,10 +52,11 @@ class Controller_BJ{
     CheckTime(room: Room_BJ) {
         if(room.state.timeTurn <= 0){
             switch (room.state.status) {
-                case GameState_BJ.Waiting:
+                case StateStatus_BJ.Waiting:
                     GameStart(room);
                     break;
-            
+                case StateStatus_BJ.DealCard:
+                    break;
                 default:
                     break;
             }
@@ -71,18 +77,44 @@ export const controller_BJ = new Controller_BJ();
 
 async function GameStart(room: Room_BJ) {
     // await delay(TimeConfig.TimeDelayStart * 1000);
-    room.state.timeTurn = TimeConfig.DealCardStart;
-    room.state.status = GameState_BJ.DealCard;
+    room.state.timeTurn = Config_BJ.TimeConfig.DealCardStart;
+    room.state.status = StateStatus_BJ.DealCard;
     console.log("GameStart");
     room.lock();
-
+    room.sendToAllClient(Config_BJ.Message_Key_Config.GameStart, 1);
     room.SufferCard();
+    var dealCard = new DealCard_BJ();
     room.playerDataDic.Keys().forEach(element => {
+        var dealCardPlayer = new DealCardPlayer_BJ();
+        dealCardPlayer.SessionId = element;
         var playerData = room.playerDataDic.Get(element)
         playerData.ResetCard();
         playerData.Card.Cards.push(room.Cards[0]);
+        dealCardPlayer.Cards.push(room.Cards[0]);
         Util.arrayRemoveByIndex(room.Cards, 0);
         playerData.Card.Cards.push(room.Cards[0]);
         Util.arrayRemoveByIndex(room.Cards, 0);
+        dealCardPlayer.Cards.push(room.Cards[0]);
+        dealCard.DealCardPlayers.push(dealCardPlayer);
+        room.sendToClient(element, Config_BJ.Message_Key_Config.UpdatePlayerData, playerData);
+        room.state.players.get(element)!.status = PlayerStatus_BJ.Dealing;
     });
+    console.log(dealCard);
+    room.sendToAllClient(Config_BJ.Message_Key_Config.DealCard, dealCard);
+}
+
+async function PlayerDeal(room: Room_BJ) {
+    room.state.status = StateStatus_BJ.PlayerDeal;
+    var key = room.playerDataDic.Keys();
+    var allPlayerDone = true;
+    for (let index = 0; index < key.length; index++) {
+        const element = key[index];
+        var player = room.state.players.get(element);
+        if(player!.status == PlayerStatus_BJ.None){
+            player!.status = PlayerStatus_BJ.Dealing;
+
+            allPlayerDone = false;
+            return;
+        }
+    }
 }

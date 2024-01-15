@@ -3,9 +3,9 @@ import { NTDictionary } from "../../Utils/NTDictionary";
 import { State_BJ } from "./State_BJ";
 import { DataModel } from "../../Utils/DataModel";
 import { PlayerData_BJ, PlayerInfo_BJ } from "./PlayerSub_BJ";
-import { Message_Key_Config } from "../Config/Config_BJ";
-import { controller_BJ } from "../Controller/controller_BJ";
 import { Util } from "../../Utils/Utils";
+import { controller_BJ } from "../Controller/Controller_BJ";
+import { Config_BJ } from "../Config/Config_BJ";
 
 export class Room_BJ extends Room<State_BJ> {
     maxClients: number = 1;
@@ -29,8 +29,11 @@ export class Room_BJ extends Room<State_BJ> {
         this.InitRoom();
         this.onMessage("message", (client, data)=>{
         })
-        this.onMessage(Message_Key_Config.PlayerJoin, (client, data)=>{
+        this.onMessage(Config_BJ.Message_Key_Config.PlayerJoin, (client, data)=>{
             controller_BJ.PlayerHit(this, client)
+        })
+        this.onMessage(Config_BJ.Message_Key_Config.GetPlayerData, (client, data : string)=>{
+            controller_BJ.GetPlayerData(this, client, data)
         })
         this.delayedInterval = this.clock.setInterval(() => {
             this.state.timeTurn--;
@@ -56,43 +59,7 @@ export class Room_BJ extends Room<State_BJ> {
     InitRoom(){
         this.playerInfoDic = new NTDictionary<PlayerInfo_BJ>();
         this.playerDataDic = new NTDictionary<PlayerData_BJ>();
-
         this.ClientDic = new NTDictionary<Client>();
-        this.PlayerChessDataDic = new NTDictionary<PlayerChessData_AAC>();
-        this.PlayerEquipDataDic = new NTDictionary<PlayerEquipData_AAC>();
-        this.playerBattleResult = new NTDictionary<ResultData>();
-        this.ShopChess = new NTDictionary<ChessInShopData_AAC>();
-        this.ChessOneGold = []
-        this.ChessTwoGold = []
-        this.ChessThreeGold = []
-        this.ChessFourGold = []
-        this.ChessFiveGold = []
-        dataChess.forEach(element => {
-            for (let index = 0; index < element.Amount; index++) {
-                var chessInShopData = new ChessInShopData_AAC();
-                chessInShopData._id = new Types.ObjectId().toString();
-                chessInShopData.ParseFromChess(element);
-                this.ShopChess.Add(chessInShopData._id, chessInShopData);
-                switch (element.Cost) {
-                    case 1:
-                        this.ChessOneGold.push(chessInShopData);
-                        break;
-                    case 2:
-                        this.ChessTwoGold.push(chessInShopData);
-                        break;
-                    case 3:
-                        this.ChessThreeGold.push(chessInShopData);
-                        break;
-                    case 4:
-                        this.ChessFourGold.push(chessInShopData);
-                        break;
-                    case 5:
-                        this.ChessFiveGold.push(chessInShopData);
-                        break;
-                }
-            }
-        });
-        console.log(this.ChessOneGold.length, this.ChessTwoGold.length, this.ChessThreeGold.length, this.ChessFourGold.length, this.ChessFiveGold.length)
     }
 
     SufferCard(){
