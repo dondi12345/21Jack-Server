@@ -145,7 +145,7 @@ function AnalyzeHitCard(room: Room_21J, cardSlot: CardSlot, card: number, player
     }
     var playerState = room.state.players.get(playerData.SessionId);
     if (cardSlot.Point > 21) {
-        room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Burst, [1, slot])
+        room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Burst, [0, slot])
         playerState!.health--;
         if (playerState!.health <= 0) {
             room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.PlayerLose, 1)
@@ -159,7 +159,7 @@ function AnalyzeHitCard(room: Room_21J, cardSlot: CardSlot, card: number, player
     }
 
     if (cardSlot.Cards.length >= 5) {
-        room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Clear, [1, slot])
+        room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Clear, [0, slot])
         cardSlot.Cards = [];
     }
     cardSlot.CaculatePoint();
