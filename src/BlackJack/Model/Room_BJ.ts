@@ -6,6 +6,7 @@ import { PlayerData_BJ, PlayerInfo_BJ } from "./PlayerSub_BJ";
 import { Util } from "../../Utils/Utils";
 import { controller_BJ } from "../Controller/Controller_BJ";
 import { Config_BJ } from "../Config/Config_BJ";
+import { logCtrl } from "../../Utils/LogCtrl";
 
 export class Room_BJ extends Room<State_BJ> {
     maxClients: number = 1;
@@ -30,12 +31,15 @@ export class Room_BJ extends Room<State_BJ> {
         this.onMessage("message", (client, data)=>{
         })
         this.onMessage(Config_BJ.Message_Key_Config.HitCard, (client, data)=>{
+            logCtrl.LogMessage(Config_BJ.Message_Key_Config.HitCard, data);
             controller_BJ.PlayerHit(this, client)
         })
         this.onMessage(Config_BJ.Message_Key_Config.Stand, (client, data)=>{
+            logCtrl.LogMessage(Config_BJ.Message_Key_Config.Stand, data);
             controller_BJ.PlayerStand(this, client)
         })
         this.onMessage(Config_BJ.Message_Key_Config.GetPlayerData, (client, data : string)=>{
+            logCtrl.LogMessage(Config_BJ.Message_Key_Config.GetPlayerData, data);
             controller_BJ.GetPlayerData(this, client, data)
         })
         this.delayedInterval = this.clock.setInterval(() => {
@@ -79,10 +83,12 @@ export class Room_BJ extends Room<State_BJ> {
     }
 
     sendToAllClient(key : string ,data){
+        logCtrl.LogMessage("sendToAllClient", key,data);
         this.broadcast(key, data)
     }
 
     sendToClient(sessionId : string, key : string, data){
+        logCtrl.LogMessage("sendToClient", key, data);
         try {
             var client =  this.ClientDic.Get(sessionId);
             if(client == null || client == undefined) return;

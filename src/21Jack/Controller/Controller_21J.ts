@@ -49,7 +49,7 @@ class Controller_21J {
         var card = playerData.Cards[0];
         Util.arrayRemoveByIndex(playerData.Cards, 0);
         
-        AnalyzeHitCard(room, cardSlot, card, playerData);
+        AnalyzeHitCard(room, cardSlot, card, playerData, hitCard.slot);
 
         var result = new ResultHitCard_21J();
         result.slot = hitCard.slot;
@@ -86,7 +86,7 @@ class Controller_21J {
         var card = playerData.HoldCard;
         playerData.HoldCard = -1;
 
-        AnalyzeHitCard(room, cardSlot, card, playerData);
+        AnalyzeHitCard(room, cardSlot, card, playerData, hitCard.slot);
 
         var result = new ResultHitCard_21J();
         result.slot = hitCard.slot;
@@ -136,7 +136,7 @@ function EndGame(room: Room_21J) {
     room.sendToAllClient(Config_21J.Message_Key_Config.PlayerLose, 1);
 }
 
-function AnalyzeHitCard(room: Room_21J, cardSlot: CardSlot, card: number, playerData : PlayerData_21J) {
+function AnalyzeHitCard(room: Room_21J, cardSlot: CardSlot, card: number, playerData : PlayerData_21J, slot : number) {
     cardSlot.Cards.push(card)
     cardSlot.CaculatePoint();
     for (let index = 0; index < playerData.WhiteCard.length; index++) {
@@ -145,7 +145,7 @@ function AnalyzeHitCard(room: Room_21J, cardSlot: CardSlot, card: number, player
     }
     var playerState = room.state.players.get(playerData.SessionId);
     if (cardSlot.Point > 21) {
-        room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Burst, 1)
+        room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Burst, [1, slot])
         playerState!.health--;
         if (playerState!.health <= 0) {
             room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.PlayerLose, 1)
@@ -153,13 +153,13 @@ function AnalyzeHitCard(room: Room_21J, cardSlot: CardSlot, card: number, player
         cardSlot.Cards = [];
     }
     if (cardSlot.Point == 21) {
-        room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.BlackJack, Config_21J.PointConfig.BlackJack)
+        room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.BlackJack, [Config_21J.PointConfig.BlackJack, slot])
         playerState!.score += Config_21J.PointConfig.BlackJack;
         cardSlot.Cards = [];
     }
 
     if (cardSlot.Cards.length >= 5) {
-        room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Clear, 1)
+        room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Clear, [1, slot])
         cardSlot.Cards = [];
     }
     cardSlot.CaculatePoint();

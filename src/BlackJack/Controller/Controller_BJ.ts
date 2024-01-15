@@ -4,6 +4,8 @@ import { CardData_BJ, DealCardPlayer_BJ, DealCard_BJ, PlayerData_BJ, PlayerInfo_
 import { Config_BJ} from "../Config/Config_BJ";
 import { StateStatus_BJ, PlayerStatus_BJ } from "../Config/GameStatus";
 import { Util } from "../../Utils/Utils";
+import { logCtrl } from "../../Utils/LogCtrl";
+import { enumUtils } from "../../Utils/EnumUtils";
 
 export const DealerSessionId = "Dealer"
 
@@ -45,19 +47,23 @@ class Controller_BJ{
 
     async PlayerHit(room: Room_BJ, client: Client){
         var player = room.state.players.get(client.sessionId);
-        if(player!.status != PlayerStatus_BJ.CardDealing) return;
+        if(player!.status != PlayerStatus_BJ.CardDealing){
+            logCtrl.LogMessage("Not turn", client.sessionId);
+            return;
+        }
         var card = room.Cards[0];
         Util.arrayRemoveByIndex(room.Cards, 0);
         var playerData = room.playerDataDic.Get(client.sessionId);
         for (let index = 0; index < playerData.CardDatas.length; index++) {
-            const element =  playerData.CardDatas[index];
+            var element =  playerData.CardDatas[index];
             if(!element.Stand){
                 element.Cards.push(card);
                 element.CaculatePoint();
                 if(element.Point >= 21) element.Stand = true;
-                return;
+                break;
             }
         }
+        room.sendToAllClient(Config_BJ.Message_Key_Config.UpdatePlayerData,playerData);
         CheckPlayerDone(room, playerData);
     }
 
@@ -67,9 +73,10 @@ class Controller_BJ{
             const element = playerData.CardDatas[index];
             if(!element.Stand){
                 element.Stand = true;
-                return;
+                break;
             }
         }
+        room.sendToAllClient(Config_BJ.Message_Key_Config.UpdatePlayerData,playerData);
         CheckPlayerDone(room, playerData);
     }
 
@@ -93,6 +100,7 @@ class Controller_BJ{
     }
 
     CheckTime(room: Room_BJ) {
+        logCtrl.LogMessage("CheckTime", room.state.timeTurn, enumUtils.ToString(StateStatus_BJ, room.state.status))
         if(room.state.timeTurn <= 0){
             switch (room.state.status) {
                 case StateStatus_BJ.Waiting:
@@ -106,6 +114,9 @@ class Controller_BJ{
                     break;
                 case StateStatus_BJ.PlayerDeal:
                     PlayerDeal(room);
+                    break;
+                case StateStatus_BJ.DealerDealing:
+                    DealerDealing(room);
                     break;
                 default:
                     break;
@@ -153,7 +164,8 @@ async function DealingCard(room: Room_BJ){
         dealCardPlayer.Cards.push(room.Cards[0]);
         Util.arrayRemoveByIndex(room.Cards, 0);
         dealCard.DealCardPlayers.push(dealCardPlayer);
-        room.state.players.get(element)!.status = PlayerStatus_BJ.CardDealing;
+        playerData.CardDatas[0].CaculatePoint();
+        room.state.players.get(element)!.status = PlayerStatus_BJ.None;
     });
     //dealer dealing
     room.Dealer = new PlayerData_BJ();
@@ -164,17 +176,15 @@ async function DealingCard(room: Room_BJ){
     room.Dealer.CardDatas[0].Cards.push(room.Cards[0])
     dealCardPlayer.Cards.push(room.Cards[0]);
     Util.arrayRemoveByIndex(room.Cards, 0);
-    room.Dealer.CardDatas[0].Cards.push(room.Cards[0])
-    dealCardPlayer.Cards.push(room.Cards[0]);
-    Util.arrayRemoveByIndex(room.Cards, 0);
     dealCard.DealCardPlayers.push(dealCardPlayer);
+    room.Dealer.CardDatas[0].CaculatePoint();
     room.sendToAllClient(Config_BJ.Message_Key_Config.DealCard, dealCard);
 }
 
 async function PlayerDeal(room: Room_BJ) {
     room.state.status = StateStatus_BJ.PlayerDeal;
     room.state.timeTurn = Config_BJ.TimeConfig.TimePlayerDealCard;
-    var key = room.playerDataDic.Keys();
+    var key = room.ClientDic.Keys();
     var allPlayerDone = true;
     for (let index = 0; index < key.length; index++) {
         const element = key[index];
@@ -204,5 +214,14 @@ async function CheckPlayerDone(room : Room_BJ, playerData : PlayerData_BJ){
     }
     if(isDone){
         room.state.timeTurn = 0;
+    }
+    logCtrl.LogMessage("CheckPlayerDone", playerData.SessionId, isDone);
+}
+
+async function DealerDealing(room : Room_BJ) {
+    if(room.Dealer.CardDatas[0].Cards.length < 2){
+        room.Dealer.CardDatas[0].Cards.push(room.Cards[0])
+        Util.arrayRemoveByIndex(room.Cards, 0);
+        room.sendToAllClient(Config_BJ.Message_Key_Config.UpdatePlayerData,room.Dealer);
     }
 }
