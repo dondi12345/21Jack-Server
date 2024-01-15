@@ -1,6 +1,6 @@
 import { Client } from "colyseus";
 import { Room_21J } from "../Model/Room_21J";
-import { PlayerData_21J, HitCard_21J, PlayerInfo_21J, PlayerJoinResult_21J, PlayerLeave_21J, ResultHitCard_21J } from "../Model/PlayerSub_21J";
+import { PlayerData_21J, HitCard_21J, PlayerInfo_21J, PlayerJoinResult_21J, PlayerLeave_21J, ResultHitCard_21J, HoldCardResult_21J } from "../Model/PlayerSub_21J";
 import { Config_21J } from "../Config/Config_21J";
 import { GameState_21J } from "../Config/GameState_21J";
 import { Util } from "../../Utils/Utils";
@@ -44,6 +44,7 @@ class Controller_21J{
 
     PlayerHitCard(room : Room_21J, client : Client, hitCard : HitCard_21J){
         var playerData = room.playerDataDic.Get(client.sessionId)
+        hitCard.slot =  hitCard.slot%4;
         var cardSlot = playerData.Slot[hitCard.slot];
         var card = playerData.Cards[0];
         cardSlot.Cards.push(card)
@@ -77,6 +78,58 @@ class Controller_21J{
     async GetPlayerData(room : Room_21J, client : Client){
         var playerData = room.playerDataDic.Get(client.sessionId);
         room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.UpdatePlayerData, playerData);
+    }
+    async HoldCard(room : Room_21J, client : Client){
+        var playerData = room.playerDataDic.Get(client.sessionId);
+        if(playerData.HoldCard < 0){
+            playerData.HoldCard = playerData.Cards[0];
+            Util.arrayRemoveByIndex(playerData.Cards, 0);
+        }else{
+            var card = playerData.HoldCard;
+            playerData.HoldCard = playerData.Cards[0];
+            playerData.Cards[0] = card;
+        }
+        var holdCardResult = new HoldCardResult_21J();
+        holdCardResult.Cards = playerData.Cards;
+        holdCardResult.HoldCard = playerData.HoldCard;
+        room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.HoldCard, holdCardResult);
+    }
+
+    async HitHoldCard(room : Room_21J, client : Client, hitCard : HitCard_21J){
+        var playerData = room.playerDataDic.Get(client.sessionId);
+        if(playerData.HoldCard < 0) return;
+        hitCard.slot =  hitCard.slot%4;
+        var cardSlot = playerData.Slot[hitCard.slot];
+        var card = playerData.HoldCard;
+        cardSlot.Cards.push(card)
+        playerData.HoldCard = -1;
+        var point = cardSlot.CaculatePoint();
+        for (let index = 0; index < playerData.WhiteCard.length; index++) {
+            const element = playerData.WhiteCard[index];
+            if(card == element) point = 21;
+        }
+        var playerState = room.state.players.get(client.sessionId);
+        if(point > 21){
+            playerState!.health --;
+            if(playerState!.health <= 0){
+                room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.PlayerLose, 1)
+            }
+            cardSlot.Cards = [];
+        }
+        if(point == 21){
+            playerState!.score += cardSlot.Cards.length;
+            cardSlot.Cards = [];
+        }
+
+        if(cardSlot.Cards.length >= 5) cardSlot.Cards = [];
+        var result = new ResultHitCard_21J();
+        result.slot = hitCard.slot;
+        result.Cards = cardSlot.Cards;
+        room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.PlayerHitCard, result);
+        var holdCardResult = new HoldCardResult_21J();
+        holdCardResult.Cards = playerData.Cards;
+        holdCardResult.HoldCard = playerData.HoldCard;
+        room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.HoldCard, holdCardResult);
     }
 
     async CheckTime(room: Room_21J){
@@ -114,5 +167,5 @@ function StartGame(room: Room_21J){
 }
 
 function EndGame(room : Room_21J){
-
+    room.sendToAllClient(Config_21J.Message_Key_Config.PlayerLose, 1);
 }

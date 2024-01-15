@@ -35,6 +35,14 @@ export class Room_21J extends Room<State_21J> {
             logCtrl.LogMessage(client.sessionId, "GetPlayerData", JSON.stringify(data))
             controller_21J.GetPlayerData(this, client);
         })
+        this.onMessage(Config_21J.Message_Key_Config.HoldCard, (client, data)=>{
+            logCtrl.LogMessage(client.sessionId, "HoldCard", JSON.stringify(data))
+            controller_21J.HoldCard(this, client);
+        })
+        this.onMessage(Config_21J.Message_Key_Config.HitHoldCard, (client, data : HitCard_21J)=>{
+            logCtrl.LogMessage(client.sessionId, "HitHoldCard", JSON.stringify(data))
+            controller_21J.HitHoldCard(this, client, data);
+        })
         this.delayedInterval = this.clock.setInterval(() => {
             this.state.timeTurn--;
             //console.log("Time: "+this.state.timeTurn);

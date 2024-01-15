@@ -3,6 +3,7 @@ import { Room_BJ } from "../Model/Room_BJ";
 import { CardData_BJ, PlayerData_BJ, PlayerInfo_BJ, PlayerJoinResult_BJ, PlayerLeave_BJ } from "../Model/PlayerSub_BJ";
 import { Message_Key_Config, TimeConfig } from "../Config/Config_BJ";
 import { GameState_BJ } from "../Config/GameStatus";
+import { Util } from "../../Utils/Utils";
 
 class Controller_BJ{
     async PlayerJoin(room: Room_BJ, client: Client, playerInfo: PlayerInfo_BJ) {
@@ -19,7 +20,7 @@ class Controller_BJ{
 
         room.sendToAllClient(Message_Key_Config.PlayerJoin, playerJoinResult);
         if(room.playerDataDic.Count() >= room.maxClients){
-            GameStart();
+            GameStart(room);
         }
     }
 
@@ -71,58 +72,17 @@ export const controller_BJ = new Controller_BJ();
 async function GameStart(room: Room_BJ) {
     // await delay(TimeConfig.TimeDelayStart * 1000);
     room.state.timeTurn = TimeConfig.DealCardStart;
+    room.state.status = GameState_BJ.DealCard;
     console.log("GameStart");
     room.lock();
-    room.state.status = GameState_BJ.DealCard;
 
     room.SufferCard();
     room.playerDataDic.Keys().forEach(element => {
         var playerData = room.playerDataDic.Get(element)
         playerData.ResetCard();
         playerData.Card.Cards.push(room.Cards[0]);
-        playerData.Ca
+        Util.arrayRemoveByIndex(room.Cards, 0);
+        playerData.Card.Cards.push(room.Cards[0]);
+        Util.arrayRemoveByIndex(room.Cards, 0);
     });
-
-
-    room.state.timeTurn = Round.prepare_before_round_start;
-    room.state.round = 1;
-    room.TotalRankPoint = 0;
-    room.state.players.forEach(playerData => {
-        try {
-            var point = room.playerInfoDic.Get(playerData.SessionId).RankPoint;
-            if (point == null || point == undefined) room.TotalRankPoint += 1000;
-            else room.TotalRankPoint += point;
-        } catch (error) {
-
-        }
-        playerData.gold = Start_Config.Gold;
-        playerData.exp = Start_Config.Exp;
-        playerData.lv = Start_Config.Lv;
-        playerData.hp = Start_Config.Hp;
-        playerData.status = PlayerStatus_AAC.NotReady;
-        var playerShopData = new PlayerShopData_AAC();
-        playerShopData.SessionId = playerData.SessionId;
-
-        //Give started chess
-        var index = Math.floor(Math.random() * room.ChessOneGold.length);
-        var chessStartData = room.ChessOneGold[index];
-        room.ChessOneGold.splice(index, 1);
-        room.ShopChess.Remove(chessStartData._id);
-
-        var chessData = new ChessData_AAC();
-        chessData._id = chessStartData._id;
-        chessData.Index = chessStartData.Index;
-        chessData.Slot = 0;
-
-        var playerChessData = room.PlayerChessDataDic.Get(playerData.SessionId);
-        playerChessData.Chesses.push(chessData);
-
-        playerShopData.Chesses = GetRandomChessForShop(room, playerData.SessionId, playerData.lv);
-
-        var gameStartResult = new GameStartResult_AAC();
-        gameStartResult.playerShopData = playerShopData;
-        gameStartResult.playerChessData = playerChessData;
-        gameStartResult.chessStart = chessData;
-        room.sendToClient(playerData.SessionId, Message_Key_Config.GameStart, gameStartResult);
-    })
 }
