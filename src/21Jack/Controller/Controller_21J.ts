@@ -1,6 +1,6 @@
 import { Client } from "colyseus";
 import { Room_21J } from "../Model/Room_21J";
-import { PlayerData_21J, HitCard_21J, PlayerInfo_21J, PlayerJoinResult_21J, PlayerLeave_21J, ResultHitCard_21J, HoldCardResult_21J, CardSlot } from "../Model/PlayerSub_21J";
+import { PlayerData_21J, HitCard_21J, PlayerInfo_21J, PlayerJoinResult_21J, PlayerLeave_21J, ResultHitCard_21J, HoldCardResult_21J, CardSlot, ResultHitHoldCard_21J } from "../Model/PlayerSub_21J";
 import { Config_21J } from "../Config/Config_21J";
 import { GameState_21J } from "../Config/GameState_21J";
 import { Util } from "../../Utils/Utils";
@@ -88,14 +88,10 @@ class Controller_21J {
 
         AnalyzeHitCard(room, cardSlot, card, playerData, hitCard.slot);
 
-        var result = new ResultHitCard_21J();
+        var result = new ResultHitHoldCard_21J();
         result.slot = hitCard.slot;
         result.CardSlot = cardSlot;
-        room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.PlayerHitCard, result);
-        var holdCardResult = new HoldCardResult_21J();
-        holdCardResult.Cards = playerData.Cards;
-        holdCardResult.HoldCard = playerData.HoldCard;
-        room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.HoldCard, holdCardResult);
+        room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.PlayerHitHoldCard, result);
     }
 
     async CheckTime(room: Room_21J) {

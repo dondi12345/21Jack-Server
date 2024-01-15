@@ -83,3 +83,8 @@ export class HoldCardResult_21J{
     Cards : number[];
     HoldCard : number;
 }
+
+export class ResultHitHoldCard_21J{
+    slot : number;
+    CardSlot : CardSlot;
+}

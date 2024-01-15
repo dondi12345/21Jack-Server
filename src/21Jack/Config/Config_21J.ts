@@ -5,6 +5,7 @@ export const Config_21J = {
         GameStart: "GameStart",
         PlayerLose: "PlayerLose",
         PlayerHitCard: "PlayerHitCard",
+        PlayerHitHoldCard: "PlayerHitHoldCard",
         GetPlayerData: "GetPlayerData",
         UpdatePlayerData: "UpdatePlayerData",
         UpdatePlayerCards: "UpdatePlayerCards",
