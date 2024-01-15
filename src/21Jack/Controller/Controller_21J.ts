@@ -111,6 +111,7 @@ class Controller_21J{
         }
         var playerState = room.state.players.get(client.sessionId);
         if(cardSlot.Point > 21){
+            room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.Burst, 1)
             playerState!.health --;
             if(playerState!.health <= 0){
                 room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.PlayerLose, 1)
@@ -118,11 +119,15 @@ class Controller_21J{
             cardSlot.Cards = [];
         }
         if(cardSlot.Point == 21){
-            playerState!.score += cardSlot.Cards.length;
+            room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.BlackJack, Config_21J.PointConfig.BlackJack)
+            playerState!.score += Config_21J.PointConfig.BlackJack;
             cardSlot.Cards = [];
         }
 
-        if(cardSlot.Cards.length >= 5) cardSlot.Cards = [];
+        if(cardSlot.Cards.length >= 5){
+            room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.Clear, 1)
+            cardSlot.Cards = [];
+        }
         cardSlot.CaculatePoint();
         var result = new ResultHitCard_21J();
         result.slot = hitCard.slot;

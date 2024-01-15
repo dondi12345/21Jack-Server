@@ -10,6 +10,9 @@ export const Config_21J = {
         UpdatePlayerCards: "UpdatePlayerCards",
         HoldCard: "HoldCard",
         HitHoldCard : "HitHoldCard",
+        BlackJack : "BlackJack",
+        Burst : "Burst",
+        Clear : "Clear",
     },
     TimeConfig: {
         TimeWaitStart: 5,
@@ -17,5 +20,8 @@ export const Config_21J = {
     },
     PlayerConfig: {
         HealthStart: 3
+    },
+    PointConfig:{
+        BlackJack : 300,
     }
 }
