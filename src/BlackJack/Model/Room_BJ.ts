@@ -7,6 +7,7 @@ import { Util } from "../../Utils/Utils";
 import { controller_BJ } from "../Controller/Controller_BJ";
 import { Config_BJ } from "../Config/Config_BJ";
 import { logCtrl } from "../../Utils/LogCtrl";
+import { StateStatus_BJ } from "../Config/GameStatus";
 
 export class Room_BJ extends Room<State_BJ> {
     maxClients: number = 1;
@@ -64,6 +65,8 @@ export class Room_BJ extends Room<State_BJ> {
     }
 
     InitRoom(){
+        this.state.timeTurn = Config_BJ.TimeConfig.TimeWaitPlayer;
+        this.state.status = StateStatus_BJ.Waiting;
         this.playerInfoDic = new NTDictionary<PlayerInfo_BJ>();
         this.playerDataDic = new NTDictionary<PlayerData_BJ>();
         this.ClientDic = new NTDictionary<Client>();

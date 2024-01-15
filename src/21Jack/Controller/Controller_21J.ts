@@ -28,6 +28,7 @@ class Controller_21J {
 
     PlayerLeave(room: Room_21J, client: Client) {
         if (room.state.status == GameState_21J.Waiting) {
+            room.playerInfoDic.Remove(client.sessionId);
             room.playerDataDic.Remove(client.sessionId)
             room.ClientDic.Remove(client.sessionId);
         } else {

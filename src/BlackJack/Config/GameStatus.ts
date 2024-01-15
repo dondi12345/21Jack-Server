@@ -4,6 +4,7 @@ export enum StateStatus_BJ{
     DealCard,
     PlayerDeal,
     DealerDealing,
+    EndGame,
 }
 
 export enum PlayerStatus_BJ{
