@@ -163,6 +163,7 @@ function AnalyzeHitCard(room: Room_21J, cardSlot: CardSlot, card: number, player
 
         playerData.Combo++;
         if(playerData.Combo > 1){
+            playerState!.score += Config_21J.PointConfig.Combo*playerData.Combo;
             room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Combo, [Config_21J.PointConfig.Combo*playerData.Combo, playerData.Combo])
         }
         isCorrect = true;
@@ -170,20 +171,24 @@ function AnalyzeHitCard(room: Room_21J, cardSlot: CardSlot, card: number, player
 
     if (cardSlot.Cards.length >= 5 && cardSlot.Point < 21) {
         room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Clear, [Config_21J.PointConfig.Clear, slot])
+        playerState!.score += Config_21J.PointConfig.Clear;
         cardSlot.Cards = [];
 
         playerData.Combo++;
         if(playerData.Combo > 1){
+            playerState!.score += Config_21J.PointConfig.Combo*playerData.Combo;
             room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Combo, [Config_21J.PointConfig.Combo*playerData.Combo, playerData.Combo])
         }
         isCorrect = true;
     }
     if (cardSlot.Cards.length >= 5 && cardSlot.Point == 21) {
         room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Perfect, [Config_21J.PointConfig.Perfect, slot])
+        playerState!.score += Config_21J.PointConfig.Perfect;
         cardSlot.Cards = [];
 
         playerData.Combo++;
         if(playerData.Combo > 1){
+            playerState!.score += Config_21J.PointConfig.Combo*playerData.Combo;
             room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Combo, [Config_21J.PointConfig.Combo*playerData.Combo, playerData.Combo])
         }
         isCorrect = true;
