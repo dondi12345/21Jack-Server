@@ -77,7 +77,7 @@ export class HitCard_21J{
 }
 export class ResultHitCard_21J{
     slot : number;
-    Cards : number[];
+    CardSlot : CardSlot;
 }
 export class HoldCardResult_21J{
     Cards : number[];

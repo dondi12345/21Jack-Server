@@ -71,7 +71,7 @@ class Controller_21J{
         cardSlot.CaculatePoint();
         var result = new ResultHitCard_21J();
         result.slot = hitCard.slot;
-        result.Cards = cardSlot.Cards;
+        result.CardSlot = cardSlot;
         room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.PlayerHitCard, result);
         room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.UpdatePlayerCards, playerData.Cards);
     }
@@ -126,7 +126,7 @@ class Controller_21J{
         cardSlot.CaculatePoint();
         var result = new ResultHitCard_21J();
         result.slot = hitCard.slot;
-        result.Cards = cardSlot.Cards;
+        result.CardSlot = cardSlot;
         room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.PlayerHitCard, result);
         var holdCardResult = new HoldCardResult_21J();
         holdCardResult.Cards = playerData.Cards;
