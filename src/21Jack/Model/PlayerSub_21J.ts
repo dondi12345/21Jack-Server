@@ -29,24 +29,36 @@ export class PlayerData_21J{
         for (let index = 0; index < 4; index++) {
             this.Slot.push(new CardSlot());
         }
+        this.WhiteCard = [];
+        this.WhiteCard.push(Util.getRandomInt(0,51))
+        while (true) {
+            var card = Util.getRandomInt(0,51);
+            if(card != this.WhiteCard[0]){
+                this.WhiteCard.push(card);
+                break;
+            }
+        }
     }
 }
 
 export class CardSlot{
     Cards : number[] = []
+    Point : number;
 
     CaculatePoint(){
-        var numb = 0;
+        this.Point = 0;
         var isOne = false;
         for (let index = 0; index < this.Cards.length; index++) {
             var point = this.Cards[index]%13 + 1
             if(point == 1) isOne = true;
             if(point > 10) point = 10;
-            numb += point; 
+            this.Point += point; 
         }
-        if(!isOne) return numb;
-        if(numb + 10 > 21) return numb;
-        return numb + 10;
+        if(isOne){
+            if(this.Point + 10 <= 21){
+                this.Point += 10;
+            }
+        }
     }
 }
 

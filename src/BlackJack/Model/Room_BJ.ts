@@ -29,8 +29,11 @@ export class Room_BJ extends Room<State_BJ> {
         this.InitRoom();
         this.onMessage("message", (client, data)=>{
         })
-        this.onMessage(Config_BJ.Message_Key_Config.PlayerJoin, (client, data)=>{
+        this.onMessage(Config_BJ.Message_Key_Config.HitCard, (client, data)=>{
             controller_BJ.PlayerHit(this, client)
+        })
+        this.onMessage(Config_BJ.Message_Key_Config.Stand, (client, data)=>{
+            controller_BJ.PlayerStand(this, client)
         })
         this.onMessage(Config_BJ.Message_Key_Config.GetPlayerData, (client, data : string)=>{
             controller_BJ.GetPlayerData(this, client, data)

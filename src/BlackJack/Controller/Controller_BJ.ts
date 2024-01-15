@@ -5,6 +5,8 @@ import { Config_BJ} from "../Config/Config_BJ";
 import { StateStatus_BJ, PlayerStatus_BJ } from "../Config/GameStatus";
 import { Util } from "../../Utils/Utils";
 
+export const DealerSessionId = "Dealer"
+
 class Controller_BJ{
     async PlayerJoin(room: Room_BJ, client: Client, playerInfo: PlayerInfo_BJ) {
         room.state.createPlayer(client.sessionId);
@@ -42,11 +44,13 @@ class Controller_BJ{
     }
 
     async PlayerHit(room: Room_BJ, client: Client){
-
+        var player = room.state.players.get(client.sessionId);
+        if(player!.status != PlayerStatus_BJ.CardDealing) return;
+        var card = room.Cards
     }
 
     async PlayerStand(room: Room_BJ, client: Client){
-
+        room.state.timeTurn =  0;
     }
 
     CheckTime(room: Room_BJ) {
@@ -55,7 +59,14 @@ class Controller_BJ{
                 case StateStatus_BJ.Waiting:
                     GameStart(room);
                     break;
+                case StateStatus_BJ.DealMoney:
+                    DealingCard(room);
+                    break;
                 case StateStatus_BJ.DealCard:
+                    PlayerDeal(room);
+                    break;
+                case StateStatus_BJ.PlayerDeal:
+                    PlayerDeal(room);
                     break;
                 default:
                     break;
@@ -77,13 +88,19 @@ export const controller_BJ = new Controller_BJ();
 
 async function GameStart(room: Room_BJ) {
     // await delay(TimeConfig.TimeDelayStart * 1000);
-    room.state.timeTurn = Config_BJ.TimeConfig.DealCardStart;
-    room.state.status = StateStatus_BJ.DealCard;
     console.log("GameStart");
     room.lock();
+    room.state.timeTurn = Config_BJ.TimeConfig.TimePlayerDealMoney;
+    room.state.status = StateStatus_BJ.DealMoney;
+}
+
+async function DealingCard(room: Room_BJ){
+    room.state.timeTurn = Config_BJ.TimeConfig.DealCardStart;
+    room.state.status = StateStatus_BJ.DealCard;
     room.sendToAllClient(Config_BJ.Message_Key_Config.GameStart, 1);
     room.SufferCard();
     var dealCard = new DealCard_BJ();
+    //player dealing
     room.playerDataDic.Keys().forEach(element => {
         var dealCardPlayer = new DealCardPlayer_BJ();
         dealCardPlayer.SessionId = element;
@@ -93,28 +110,42 @@ async function GameStart(room: Room_BJ) {
         dealCardPlayer.Cards.push(room.Cards[0]);
         Util.arrayRemoveByIndex(room.Cards, 0);
         playerData.Card.Cards.push(room.Cards[0]);
-        Util.arrayRemoveByIndex(room.Cards, 0);
         dealCardPlayer.Cards.push(room.Cards[0]);
+        Util.arrayRemoveByIndex(room.Cards, 0);
         dealCard.DealCardPlayers.push(dealCardPlayer);
-        room.sendToClient(element, Config_BJ.Message_Key_Config.UpdatePlayerData, playerData);
-        room.state.players.get(element)!.status = PlayerStatus_BJ.Dealing;
+        room.state.players.get(element)!.status = PlayerStatus_BJ.CardDealing;
     });
-    console.log(dealCard);
+    //dealer dealing
+    var dealCardPlayer = new DealCardPlayer_BJ();
+    dealCardPlayer.SessionId = DealerSessionId;
+    room.Dealer.Card.Cards.push(room.Cards[0])
+    dealCardPlayer.Cards.push(room.Cards[0]);
+    Util.arrayRemoveByIndex(room.Cards, 0);
+    room.Dealer.Card.Cards.push(room.Cards[0])
+    dealCardPlayer.Cards.push(room.Cards[0]);
+    Util.arrayRemoveByIndex(room.Cards, 0);
+    dealCard.DealCardPlayers.push(dealCardPlayer);
     room.sendToAllClient(Config_BJ.Message_Key_Config.DealCard, dealCard);
 }
 
 async function PlayerDeal(room: Room_BJ) {
     room.state.status = StateStatus_BJ.PlayerDeal;
+    room.state.timeTurn = Config_BJ.TimeConfig.TimePlayerDealCard;
     var key = room.playerDataDic.Keys();
     var allPlayerDone = true;
     for (let index = 0; index < key.length; index++) {
         const element = key[index];
         var player = room.state.players.get(element);
+        if(player!.status == PlayerStatus_BJ.CardDealing){
+            player!.status = PlayerStatus_BJ.CardDealingDone;
+        }
         if(player!.status == PlayerStatus_BJ.None){
-            player!.status = PlayerStatus_BJ.Dealing;
-
+            player!.status = PlayerStatus_BJ.CardDealing;
             allPlayerDone = false;
             return;
         }
+    }
+    if(allPlayerDone){
+        room.state.status = StateStatus_BJ.DealerDealing;
     }
 }

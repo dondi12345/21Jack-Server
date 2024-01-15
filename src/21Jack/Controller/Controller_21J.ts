@@ -49,25 +49,26 @@ class Controller_21J{
         var card = playerData.Cards[0];
         cardSlot.Cards.push(card)
         Util.arrayRemoveByIndex(playerData.Cards, 0);
-        var point = cardSlot.CaculatePoint();
+        cardSlot.CaculatePoint();
         for (let index = 0; index < playerData.WhiteCard.length; index++) {
             const element = playerData.WhiteCard[index];
-            if(card == element) point = 21;
+            if(card == element) cardSlot.Point = 21;
         }
         var playerState = room.state.players.get(client.sessionId);
-        if(point > 21){
+        if(cardSlot.Point > 21){
             playerState!.health --;
             if(playerState!.health <= 0){
                 room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.PlayerLose, 1)
             }
             cardSlot.Cards = [];
         }
-        if(point == 21){
+        if(cardSlot.Point == 21){
             playerState!.score += cardSlot.Cards.length;
             cardSlot.Cards = [];
         }
 
         if(cardSlot.Cards.length >= 5) cardSlot.Cards = [];
+        cardSlot.CaculatePoint();
         var result = new ResultHitCard_21J();
         result.slot = hitCard.slot;
         result.Cards = cardSlot.Cards;
@@ -103,25 +104,26 @@ class Controller_21J{
         var card = playerData.HoldCard;
         cardSlot.Cards.push(card)
         playerData.HoldCard = -1;
-        var point = cardSlot.CaculatePoint();
+        cardSlot.CaculatePoint();
         for (let index = 0; index < playerData.WhiteCard.length; index++) {
             const element = playerData.WhiteCard[index];
-            if(card == element) point = 21;
+            if(card == element) cardSlot.Point = 21;
         }
         var playerState = room.state.players.get(client.sessionId);
-        if(point > 21){
+        if(cardSlot.Point > 21){
             playerState!.health --;
             if(playerState!.health <= 0){
                 room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.PlayerLose, 1)
             }
             cardSlot.Cards = [];
         }
-        if(point == 21){
+        if(cardSlot.Point == 21){
             playerState!.score += cardSlot.Cards.length;
             cardSlot.Cards = [];
         }
 
         if(cardSlot.Cards.length >= 5) cardSlot.Cards = [];
+        cardSlot.CaculatePoint();
         var result = new ResultHitCard_21J();
         result.slot = hitCard.slot;
         result.Cards = cardSlot.Cards;

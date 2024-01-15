@@ -7,12 +7,16 @@ export const Config_BJ = {
         PlayerLose : "PlayerLose",
         GetPlayerData : "GetPlayerData",
         UpdatePlayerData : "UpdatePlayerData",
+        DealMoney : "DealMoney",
+        HitCard : "HitCard",
+        Stand : "Stand",
     },
     TimeConfig: {
         TimeWaitPlayer : 30,
         TimeWaitStart: 5,
         TimeDelayRound: 30,
         DealCardStart: 5,
-        TimePlayerDeal: 30,
+        TimePlayerDealCard: 30,
+        TimePlayerDealMoney: 10,
     },
 }

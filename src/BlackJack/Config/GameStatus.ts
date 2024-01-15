@@ -1,11 +1,13 @@
 export enum StateStatus_BJ{
-    Waiting, 
+    Waiting,
+    DealMoney, 
     DealCard,
     PlayerDeal,
+    DealerDealing,
 }
 
 export enum PlayerStatus_BJ{
     None,
-    Dealing,
-    DoneDealing,
+    CardDealing,
+    CardDealingDone,
 }
