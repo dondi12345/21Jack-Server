@@ -25,7 +25,7 @@ export class Room_BJ extends Room<State_BJ> {
     IsCaculate : boolean = false;
 
     onCreate(options: any){
-        //console.log("Room_AAC created!", options);
+        console.log("Room_BJ created!", options);
         var state = new State_BJ();
         this.setState(state);
         this.InitRoom();

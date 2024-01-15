@@ -20,8 +20,12 @@ export class Room_21J extends Room<State_21J> {
 
     IsCaculate : boolean = false;
 
+    Bet : number = 3;
+
     onCreate(options: any){
         console.log("Room_21J created!", options);
+        var playerInfo = DataModel.Parse<PlayerInfo_21J>(options);
+        this.Bet = playerInfo.Bet;
         var state = new State_21J();
         this.setState(state);
         this.InitRoom();

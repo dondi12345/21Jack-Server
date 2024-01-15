@@ -5,6 +5,7 @@ export class PlayerInfo_21J {
     SessionId: string;
     Name: string;
     Avata: string;
+    Bet : number;
 }
 
 export class PlayerData_21J{
@@ -13,8 +14,10 @@ export class PlayerData_21J{
     HoldCard : number = -1;
     WhiteCard : number[] = [];
     Slot : CardSlot[] = [];
+    Combo : number = 0;
 
     ResetData(){
+        this.Combo = 0;
         var cards : number[] = [];
         for (let index = 0; index < 52; index++) {
             cards.push(index);
@@ -30,14 +33,16 @@ export class PlayerData_21J{
             this.Slot.push(new CardSlot());
         }
         this.WhiteCard = [];
-        this.WhiteCard.push(Util.getRandomInt(0,51))
-        while (true) {
-            var card = Util.getRandomInt(0,51);
-            if(card != this.WhiteCard[0]){
-                this.WhiteCard.push(card);
-                break;
-            }
-        }
+        this.WhiteCard.push(23);
+        this.WhiteCard.push(36);
+        // this.WhiteCard.push(Util.getRandomInt(0,51))
+        // while (true) {
+        //     var card = Util.getRandomInt(0,51);
+        //     if(card != this.WhiteCard[0]){
+        //         this.WhiteCard.push(card);
+        //         break;
+        //     }
+        // }
     }
 }
 

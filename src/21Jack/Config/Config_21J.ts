@@ -14,6 +14,8 @@ export const Config_21J = {
         BlackJack : "BlackJack",
         Burst : "Burst",
         Clear : "Clear",
+        Perfect : "Perfect",
+        Combo : "Combo",
     },
     TimeConfig: {
         TimeWaitStart: 5,
@@ -23,6 +25,9 @@ export const Config_21J = {
         HealthStart: 3
     },
     PointConfig:{
-        BlackJack : 300,
+        BlackJack : 400,
+        Clear : 600,
+        Combo : 200,
+        Perfect : 1500,
     }
 }

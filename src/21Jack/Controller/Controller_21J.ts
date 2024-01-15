@@ -57,6 +57,9 @@ class Controller_21J {
         result.CardSlot = cardSlot;
         room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.PlayerHitCard, result);
         room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.UpdatePlayerCards, playerData.Cards);
+        if(playerData.HoldCard < 0 && playerData.Cards.length == 0){
+            room.sendToAllClient(Config_21J.Message_Key_Config.PlayerLose, 1);
+        }
     }
 
     async GetPlayerData(room: Room_21J, client: Client) {
@@ -93,6 +96,9 @@ class Controller_21J {
         result.slot = hitCard.slot;
         result.CardSlot = cardSlot;
         room.sendToClient(client.sessionId, Config_21J.Message_Key_Config.PlayerHitHoldCard, result);
+        if(playerData.HoldCard < 0 && playerData.Cards.length == 0){
+            room.sendToAllClient(Config_21J.Message_Key_Config.PlayerLose, 1);
+        }
     }
 
     async CheckTime(room: Room_21J) {
@@ -134,6 +140,7 @@ function EndGame(room: Room_21J) {
 }
 
 function AnalyzeHitCard(room: Room_21J, cardSlot: CardSlot, card: number, playerData : PlayerData_21J, slot : number) {
+    var isCorrect = false;
     cardSlot.Cards.push(card)
     cardSlot.CaculatePoint();
     for (let index = 0; index < playerData.WhiteCard.length; index++) {
@@ -149,15 +156,40 @@ function AnalyzeHitCard(room: Room_21J, cardSlot: CardSlot, card: number, player
         }
         cardSlot.Cards = [];
     }
-    if (cardSlot.Point == 21) {
+    if (cardSlot.Point == 21 && cardSlot.Cards.length < 5) {
         room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.BlackJack, [Config_21J.PointConfig.BlackJack, slot])
         playerState!.score += Config_21J.PointConfig.BlackJack;
         cardSlot.Cards = [];
+
+        playerData.Combo++;
+        if(playerData.Combo > 1){
+            room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Combo, [Config_21J.PointConfig.Combo*playerData.Combo, playerData.Combo])
+        }
+        isCorrect = true;
     }
 
-    if (cardSlot.Cards.length >= 5) {
-        room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Clear, [0, slot])
+    if (cardSlot.Cards.length >= 5 && cardSlot.Point < 21) {
+        room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Clear, [Config_21J.PointConfig.Clear, slot])
         cardSlot.Cards = [];
+
+        playerData.Combo++;
+        if(playerData.Combo > 1){
+            room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Combo, [Config_21J.PointConfig.Combo*playerData.Combo, playerData.Combo])
+        }
+        isCorrect = true;
+    }
+    if (cardSlot.Cards.length >= 5 && cardSlot.Point == 21) {
+        room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Perfect, [Config_21J.PointConfig.Perfect, slot])
+        cardSlot.Cards = [];
+
+        playerData.Combo++;
+        if(playerData.Combo > 1){
+            room.sendToClient(playerData.SessionId, Config_21J.Message_Key_Config.Combo, [Config_21J.PointConfig.Combo*playerData.Combo, playerData.Combo])
+        }
+        isCorrect = true;
+    }
+    if(!isCorrect){
+        playerData.Combo = 0;
     }
     cardSlot.CaculatePoint();
 }
