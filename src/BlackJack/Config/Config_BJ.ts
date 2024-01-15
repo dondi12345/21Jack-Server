@@ -10,13 +10,14 @@ export const Config_BJ = {
         DealMoney : "DealMoney",
         HitCard : "HitCard",
         Stand : "Stand",
+        Split : "Split",
     },
     TimeConfig: {
         TimeWaitPlayer : 30,
         TimeWaitStart: 5,
         TimeDelayRound: 30,
         DealCardStart: 5,
-        TimePlayerDealCard: 30,
+        TimePlayerDealCard: 60,
         TimePlayerDealMoney: 10,
     },
 }

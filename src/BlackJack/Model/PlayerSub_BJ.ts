@@ -9,21 +9,32 @@ export class PlayerInfo_BJ {
 
 export class PlayerData_BJ {
     SessionId: string;
-    Card: CardData_BJ = new CardData_BJ();
-    Stand: boolean = false;
-    SlipCard: CardData_BJ = new CardData_BJ();
-    StandSlip: boolean = false;
+    CardDatas : CardData_BJ[] = []
 
     ResetCard() {
-        this.Card = new CardData_BJ();
-        this.SlipCard = new CardData_BJ();
-        this.Stand = false;
-        this.StandSlip = false;
+        this.CardDatas = [];
     }
 }
 
 export class CardData_BJ {
     Cards: number[] = [];
+    Stand: boolean = false;
+    Point : number;
+    CaculatePoint(){
+        this.Point = 0;
+        var isOne = false;
+        for (let index = 0; index < this.Cards.length; index++) {
+            var point = this.Cards[index]%13 + 1
+            if(point == 1) isOne = true;
+            if(point > 10) point = 10;
+            this.Point += point; 
+        }
+        if(isOne){
+            if(this.Point + 10 <= 21){
+                this.Point += 10;
+            }
+        }
+    }
 }
 
 export class PlayerJoinResult_BJ {

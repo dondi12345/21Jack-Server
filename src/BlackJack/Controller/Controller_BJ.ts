@@ -46,11 +46,50 @@ class Controller_BJ{
     async PlayerHit(room: Room_BJ, client: Client){
         var player = room.state.players.get(client.sessionId);
         if(player!.status != PlayerStatus_BJ.CardDealing) return;
-        var card = room.Cards
+        var card = room.Cards[0];
+        Util.arrayRemoveByIndex(room.Cards, 0);
+        var playerData = room.playerDataDic.Get(client.sessionId);
+        for (let index = 0; index < playerData.CardDatas.length; index++) {
+            const element =  playerData.CardDatas[index];
+            if(!element.Stand){
+                element.Cards.push(card);
+                element.CaculatePoint();
+                if(element.Point >= 21) element.Stand = true;
+                return;
+            }
+        }
+        CheckPlayerDone(room, playerData);
     }
 
     async PlayerStand(room: Room_BJ, client: Client){
-        room.state.timeTurn =  0;
+        var playerData = room.playerDataDic.Get(client.sessionId);
+        for (let index = 0; index < playerData.CardDatas.length; index++) {
+            const element = playerData.CardDatas[index];
+            if(!element.Stand){
+                element.Stand = true;
+                return;
+            }
+        }
+        CheckPlayerDone(room, playerData);
+    }
+
+    async PlayerSplit(room: Room_BJ, client: Client){
+        var playerData = room.playerDataDic.Get(client.sessionId);
+        for (let index = 0; index < playerData.CardDatas.length; index++) {
+            const element = playerData.CardDatas[index];
+            if(!element.Stand){
+                if(element.Cards.length == 2){
+                    if(element.Cards[0]%13 == element.Cards[1]%13){
+                        var splitCD = new CardData_BJ();
+                        playerData.CardDatas.push(splitCD);
+                        splitCD.Cards.push(element.Cards[1]);
+                        Util.arrayRemoveByIndex(element.Cards, 1);
+                        room.sendToAllClient(Config_BJ.Message_Key_Config.UpdatePlayerData,playerData);
+                    }
+                }
+                return;
+            }
+        }
     }
 
     CheckTime(room: Room_BJ) {
@@ -106,22 +145,26 @@ async function DealingCard(room: Room_BJ){
         dealCardPlayer.SessionId = element;
         var playerData = room.playerDataDic.Get(element)
         playerData.ResetCard();
-        playerData.Card.Cards.push(room.Cards[0]);
+        playerData.CardDatas.push(new CardData_BJ());
+        playerData.CardDatas[0].Cards.push(room.Cards[0]);
         dealCardPlayer.Cards.push(room.Cards[0]);
         Util.arrayRemoveByIndex(room.Cards, 0);
-        playerData.Card.Cards.push(room.Cards[0]);
+        playerData.CardDatas[0].Cards.push(room.Cards[0]);
         dealCardPlayer.Cards.push(room.Cards[0]);
         Util.arrayRemoveByIndex(room.Cards, 0);
         dealCard.DealCardPlayers.push(dealCardPlayer);
         room.state.players.get(element)!.status = PlayerStatus_BJ.CardDealing;
     });
     //dealer dealing
+    room.Dealer = new PlayerData_BJ();
+    room.Dealer.SessionId = DealerSessionId;
     var dealCardPlayer = new DealCardPlayer_BJ();
     dealCardPlayer.SessionId = DealerSessionId;
-    room.Dealer.Card.Cards.push(room.Cards[0])
+    room.Dealer.CardDatas.push(new CardData_BJ());
+    room.Dealer.CardDatas[0].Cards.push(room.Cards[0])
     dealCardPlayer.Cards.push(room.Cards[0]);
     Util.arrayRemoveByIndex(room.Cards, 0);
-    room.Dealer.Card.Cards.push(room.Cards[0])
+    room.Dealer.CardDatas[0].Cards.push(room.Cards[0])
     dealCardPlayer.Cards.push(room.Cards[0]);
     Util.arrayRemoveByIndex(room.Cards, 0);
     dealCard.DealCardPlayers.push(dealCardPlayer);
@@ -147,5 +190,19 @@ async function PlayerDeal(room: Room_BJ) {
     }
     if(allPlayerDone){
         room.state.status = StateStatus_BJ.DealerDealing;
+    }
+}
+
+async function CheckPlayerDone(room : Room_BJ, playerData : PlayerData_BJ){
+    var isDone = true;
+    for (let index = 0; index < playerData.CardDatas.length; index++) {
+        const element = playerData.CardDatas[index];
+        if(!element.Stand) {
+            isDone = false;
+            break;
+        }
+    }
+    if(isDone){
+        room.state.timeTurn = 0;
     }
 }
