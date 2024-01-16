@@ -19,7 +19,7 @@ export const Config_21J = {
     },
     TimeConfig: {
         TimeWaitStart: 5,
-        DurationPlayer: 180
+        DurationPlayer: 185
     },
     PlayerConfig: {
         HealthStart: 3

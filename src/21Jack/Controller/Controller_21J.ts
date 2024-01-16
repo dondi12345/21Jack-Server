@@ -124,6 +124,7 @@ function StartGame(room: Room_21J) {
     room.state.timeTurn = Config_21J.TimeConfig.DurationPlayer;
     room.state.status = GameState_21J.Playing;
     room.sendToAllClient(Config_21J.Message_Key_Config.GameStart, 1);
+    room.lock();
     var keys = room.playerDataDic.Keys();
     for (let index = 0; index < keys.length; index++) {
         const element = keys[index];
