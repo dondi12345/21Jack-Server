@@ -18,7 +18,7 @@ export const Config_21J = {
         Combo : "Combo",
     },
     TimeConfig: {
-        TimeWaitStart: 5,
+        TimeWaitStart: 15,
         DurationPlayer: 185
     },
     PlayerConfig: {

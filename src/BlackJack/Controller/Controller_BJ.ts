@@ -306,4 +306,5 @@ async function EndGame(room: Room_BJ) {
         room.state.timeTurn = Config_BJ.TimeConfig.TimeWaitPlayer
         room.state.status = StateStatus_BJ.Waiting;
     }
+    room.disconnect();
 }

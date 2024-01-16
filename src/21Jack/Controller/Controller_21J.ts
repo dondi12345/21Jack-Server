@@ -138,6 +138,7 @@ function StartGame(room: Room_21J) {
 
 function EndGame(room: Room_21J) {
     room.sendToAllClient(Config_21J.Message_Key_Config.PlayerLose, 1);
+    room.disconnect();
 }
 
 function AnalyzeHitCard(room: Room_21J, cardSlot: CardSlot, card: number, playerData : PlayerData_21J, slot : number) {

@@ -10,7 +10,7 @@ import { GameState_21J } from "../Config/GameState_21J";
 import { logCtrl } from "../../Utils/LogCtrl";
 
 export class Room_21J extends Room<State_21J> {
-    maxClients: number = 1;
+    maxClients: number = 2;
 
     ClientDic : NTDictionary<Client>;
     playerInfoDic : NTDictionary<PlayerInfo_21J>;
@@ -20,12 +20,13 @@ export class Room_21J extends Room<State_21J> {
 
     IsCaculate : boolean = false;
 
-    Bet : number = 3;
+    Bet : number = 5;
 
     onCreate(options: any){
         console.log("Room_21J created!", options);
         var playerInfo = DataModel.Parse<PlayerInfo_21J>(options);
         this.Bet = playerInfo.Bet;
+        this.setMetadata({Bet : this.Bet})
         var state = new State_21J();
         this.setState(state);
         this.InitRoom();
@@ -59,6 +60,7 @@ export class Room_21J extends Room<State_21J> {
         var playerInfo = DataModel.Parse<PlayerInfo_21J>(options);
         console.log(client.sessionId + ": Join", playerInfo)
         controller_21J.PlayerJoin(this, client, playerInfo);
+        console.log("Metadata", this.metadata);
     }
 
     onLeave (client) {
