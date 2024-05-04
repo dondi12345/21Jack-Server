@@ -6,7 +6,10 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "tsc",
-    "start": "tsx src/App.ts"
+    "start": "tsx src/App.ts",
+    "schema-codegen" : "npm run 21Jack-codegen && npm run BlackJack-codegen",
+    "21Jack-codegen" : "schema-codegen src/21Jack/Model/State_21J.ts --output client-side/21Jack/ --csharp --namespace Rubik._21J",
+    "BlackJack-codegen" : "schema-codegen src/BlackJack/Model/State_BJ.ts --output client-side/BlackJack/ --csharp --namespace Rubik.BlackJack"
   },
   "keywords": [],
   "author": "",
